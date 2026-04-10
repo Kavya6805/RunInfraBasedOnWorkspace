@@ -2,6 +2,10 @@ provider "aws" {
     region = "ap-south-1"
 }
 
+variable "workspace" {
+  type = string
+}
+
 terraform {
   backend "s3" {
     bucket = "terraform-state-file-stroage-v1"
@@ -31,6 +35,6 @@ resource "aws_instance" "example" {
   instance_type = "t3.micro"
 
   tags = {
-    Name = "HelloWorld"
+    Name = "${var.workspace}-HelloWorld"
   }
 }
