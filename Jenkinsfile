@@ -52,7 +52,7 @@ pipeline {
             steps {
                 withCredentials([[ $class: 'AmazonWebServicesCredentialsBinding', 
                                    credentialsId: 'aws-global-creds']]) {
-                    sh 'terraform apply -auto-approve'
+                    sh "terraform apply -auto-approve -var='workspace=${params.WORK_SPACE}'"
                 }
             }
         }
