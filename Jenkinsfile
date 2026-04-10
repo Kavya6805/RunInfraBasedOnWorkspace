@@ -22,18 +22,21 @@ pipeline {
         }
         stage('Create/Switch workspace'){
             steps{
-                sh 'terraform workspace show'
-                script{
-                    def status = sh(
-                        script: "terraform workspace select ${params.WORK_SPACE}",
-                        returnStatus: true
-                    )
-                    if (status != 0){
-                        sh "terraform workspace new ${params.WORK_SPACE}"
-                        sh "terraform workspace select ${params.WORK_SPACE}"
+                withCredentials([[ $class: 'AmazonWebServicesCredentialsBinding', 
+                                   credentialsId: 'aws-global-creds']]) {
+                    sh 'terraform workspace show'
+                    script{
+                        def status = sh(
+                            script: "terraform workspace select ${params.WORK_SPACE}",
+                            returnStatus: true
+                        )
+                        if (status != 0){
+                            sh "terraform workspace new ${params.WORK_SPACE}"
+                            sh "terraform workspace select ${params.WORK_SPACE}"
+                        }
                     }
+                    sh 'terraform workspace show'
                 }
-                sh 'terraform workspace show'
             }
         }
         stage('Terraform plan') {
@@ -45,14 +48,14 @@ pipeline {
                 input message: 'Do you want to proceed to the next stage?'
             }
         }
-        // stage('Terraform apply') {
-        //     steps {
-        //         withCredentials([[ $class: 'AmazonWebServicesCredentialsBinding', 
-        //                            credentialsId: 'aws-global-creds']]) {
-        //             sh 'terraform apply -auto-approve'
-        //         }
-        //     }
-        // }
+        stage('Terraform apply') {
+            steps {
+                withCredentials([[ $class: 'AmazonWebServicesCredentialsBinding', 
+                                   credentialsId: 'aws-global-creds']]) {
+                    sh 'terraform apply -auto-approve'
+                }
+            }
+        }
     }
     post{
         always{
