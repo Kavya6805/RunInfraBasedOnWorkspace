@@ -23,12 +23,17 @@ pipeline {
         stage('Create/Switch workspace'){
             steps{
                 sh 'terraform workspace show'
-                sh "terraform workspace switch ${params.WORK_SPACE}" 
-                if ( sh '$?' ){
-                    echo 'create workspace'
-                }
-                else{
-                    echo 'switching workspace'
+                script{
+                    def status = sh(
+                        script: "terraform workspace select ${params.WORK_SPACE}",
+                        returnStatus: true
+                    )
+                    if (status == 0){
+                        echo 'existss'
+                    }
+                    else{
+                        echo 'switching workspace'
+                    }
                 }
             }
         }
